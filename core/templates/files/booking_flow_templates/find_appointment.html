@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Appointment – The Dental Bar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary:     #0d9488;
+            --primary-dark:#0f766e;
+            --light-bg:    #f9fafb;
+            --card-bg:     #ffffff;
+            --text:        #111827;
+            --text-light:  #6b7280;
+            --border:      #e5e7eb;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container-main {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 2.5rem 1rem 5rem;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1.25rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i { color: var(--primary-dark); }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.05rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            padding: 2.5rem;
+        }
+
+        .search-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-10);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.85rem 1.25rem;
+            border: 1px solid var(--border);
+            font-size: 1.05rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem var(--primary-10);
+        }
+
+        .search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-header i {
+            font-size: 1.8rem;
+            color: var(--success);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child { border-bottom: none; }
+
+        .detail-label { color: var(--text-light); font-size: 0.95rem; }
+        .detail-value { font-weight: 600; font-size: 1.05rem; }
+
+        .status-badge {
+            padding: 0.4rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-confirmed { background: #d1fae5; color: #065f46; }
+        .status-scheduled { background: #fef3c7; color: #92400e; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 3rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            background: var(--primary-10);
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 6rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.4;
+        }
+
+        @media (max-width: 576px) {
+            .container-main { padding: 2rem 1rem 4rem; }
+            .page-title { font-size: 1.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'index' %}" class="logo">
+                    <i class="fas fa-tooth"></i>
+                    <span>The Dental Bar</span>
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-outline-primary px-4 py-2">
+                    Staff / Dentist Login
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container-main">
+        <div class="text-center mb-5">
+            <h1 class="page-title">Find Your Appointment</h1>
+            <p class="page-subtitle">Enter your email or phone number to view details</p>
+        </div>
+
+        <div class="search-card">
+            <div class="search-icon">
+                <i class="fas fa-search"></i>
+            </div>
+
+            <form method="POST" class="search-form">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="text" class="form-control" 
+                           name="search_term" 
+                           placeholder="Email or phone number" 
+                           required
+                           value="{{ request.POST.search_term|default:'' }}">
+                </div>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </form>
+
+            <!-- Results -->
+            {% if search_performed %}
+                {% if appointment %}
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="fas fa-calendar-check"></i>
+                        <h4 class="mb-0">Appointment Found</h4>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Appointment ID</div>
+                        <div class="detail-value">{{ appointment.appointment_id }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            <span class="status-badge status-{{ appointment.status }}">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Date & Time</div>
+                        <div class="detail-value">
+                            {{ appointment.schedule_slot.date|date:"l, F d, Y" }}<br>
+                            {{ appointment.schedule_slot.start_time|time:"g:i A" }}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Service</div>
+                        <div class="detail-value">{{ appointment.service.name }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Dentist</div>
+                        <div class="detail-value">
+                            Dr. {{ appointment.dentist.get_full_name|default:appointment.dentist.username }}
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{% url 'appointment_confirmation' appointment.appointment_id %}" 
+                           class="btn btn-primary w-100">
+                            View Full Details
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+                    <h5>No Appointment Found</h5>
+                    <p class="mt-3">We couldn't find an appointment with the information you provided.</p>
+                    <p class="text-muted">Please check your email/phone or contact us at (303) 228-0224.</p>
+                </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Back -->
+        <div class="text-center mt-4">
+            <a href="{% url 'index' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
