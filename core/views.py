@@ -166,11 +166,11 @@ def login_view(request):
 
         if user is None:
             messages.error(request, "Invalid login credentials.")
-            return render(request, "files/login.html")
+            return render(request, "files/auth_templates/login.html")
 
         if not user.is_active:
             messages.error(request, "Account inactive.")
-            return render(request, "files/login.html")
+            return render(request, "files/auth_templates/login.html")
 
         login(request, user)
         return redirect(redirect_user_by_role(user))

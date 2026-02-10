@@ -13,9 +13,10 @@ SECRET_KEY = 'django-insecure-z5d7&$^p4$#72**15f9(mtqmoyzhtb-ipu1$c_0rg(bdmi147c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bf4c1b168f35.ngrok-free.app', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = ['https://bf4c1b168f35.ngrok-free.app']
 
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'http://localhost:8000']
 
 AUTH_USER_MODEL = 'core.User'
 # Application definition
@@ -64,12 +65,23 @@ WSGI_APPLICATION = 'DBMS.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "defaultdb",
+        "USER": "avnadmin",
+        "PASSWORD": "AVNS_iN_fjuXEz8t9-dPqUl5",
+        "HOST": "pg-3a845e2f-dbms-001.d.aivencloud.com",
+        "PORT": "15801",
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
+
 
 
 # Password validation
