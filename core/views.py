@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.utils import timezone
+from .email import *
 
 # Create your views here.
 
@@ -111,6 +112,8 @@ def confirm_booking(request, schedule_id, service_id):
         
         # Track completion
         # visitor_tracking(request, 'booking_completed', appointment_id=appointment.id)
+           # Send confirmation email
+        send_appointment_confirmation(appointment)
         
         # Redirect to confirmation page
         return redirect('appointment_confirmation', appointment_id=appointment.appointment_id)
