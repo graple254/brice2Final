@@ -227,16 +227,13 @@ def staff_dashboard(request):
         },
     )
 
-
-
 @login_required
 @role_required(['staff'])
 def staff_create_schedules(request):
-    """Staff dashboard - bulk create dentist schedules"""
+    """Staff dashboard - manage dentists and bulk create schedules"""
 
     dentists = User.objects.filter(role=User.DENTIST).order_by("username")
 
-    # Base queryset
     schedules_qs = DentistSchedule.objects.select_related("dentist") \
         .order_by("created_at")
 
@@ -245,55 +242,103 @@ def staff_create_schedules(request):
     recent_schedules = paginator.get_page(page_number)
 
     if request.method == "POST":
-        dentist_id = request.POST.get("dentist_id")
-        start_date_str = request.POST.get("start_date")
-        end_date_str = request.POST.get("end_date")
-        start_time_str = request.POST.get("start_time")
-        end_time_str = request.POST.get("end_time")
+        action = request.POST.get("action")
 
-        dentist = get_object_or_404(User, id=dentist_id, role=User.DENTIST)
+        # =================================
+        # ADD NEW DENTIST
+        # =================================
+        if action == "add_dentist":
+            username = request.POST.get("username")
+            email = request.POST.get("email")
+            specialty = request.POST.get("specialty")
+            password = request.POST.get("password")
 
-        try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-            start_time = datetime.strptime(start_time_str, "%H:%M").time()
-            end_time = datetime.strptime(end_time_str, "%H:%M").time()
-        except ValueError:
-            messages.error(request, "Invalid date or time format.")
+            if not username or not password:
+                messages.error(request, "Username and password required.")
+                return redirect("staff_create_schedules")
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Dentist already exists.")
+                return redirect("staff_create_schedules")
+
+            User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                role=User.DENTIST,
+                specialty=specialty
+            )
+
+            messages.success(request, "Dentist added successfully.")
             return redirect("staff_create_schedules")
 
-        if start_date > end_date:
-            messages.error(request, "Start date cannot be after end date.")
+        # =================================
+        # DELETE DENTIST
+        # =================================
+        if action == "delete_dentist":
+            dentist_id = request.POST.get("dentist_id")
+
+            dentist = get_object_or_404(User, id=dentist_id, role=User.DENTIST)
+            dentist.delete()
+
+            messages.success(request, "Dentist removed successfully.")
             return redirect("staff_create_schedules")
 
-        created, skipped = 0, 0
-        current_date = start_date
+        # =================================
+        # CREATE SCHEDULES
+        # =================================
+        if action == "create_schedule":
 
-        while current_date <= end_date:
-            if DentistSchedule.objects.filter(
-                dentist=dentist,
-                date=current_date,
-                start_time=start_time,
-            ).exists():
-                skipped += 1
-            else:
-                DentistSchedule.objects.create(
+            dentist_id = request.POST.get("dentist_id")
+            start_date_str = request.POST.get("start_date")
+            end_date_str = request.POST.get("end_date")
+            start_time_str = request.POST.get("start_time")
+            end_time_str = request.POST.get("end_time")
+
+            dentist = get_object_or_404(User, id=dentist_id, role=User.DENTIST)
+
+            try:
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+                start_time = datetime.strptime(start_time_str, "%H:%M").time()
+                end_time = datetime.strptime(end_time_str, "%H:%M").time()
+            except ValueError:
+                messages.error(request, "Invalid date or time format.")
+                return redirect("staff_create_schedules")
+
+            if start_date > end_date:
+                messages.error(request, "Start date cannot be after end date.")
+                return redirect("staff_create_schedules")
+
+            created, skipped = 0, 0
+            current_date = start_date
+
+            while current_date <= end_date:
+
+                if DentistSchedule.objects.filter(
                     dentist=dentist,
                     date=current_date,
-                    start_time=start_time,
-                    end_time=end_time,
-                    is_available=True,
-                )
-                created += 1
+                    start_time=start_time
+                ).exists():
+                    skipped += 1
+                else:
+                    DentistSchedule.objects.create(
+                        dentist=dentist,
+                        date=current_date,
+                        start_time=start_time,
+                        end_time=end_time,
+                        is_available=True
+                    )
+                    created += 1
 
-            current_date += timedelta(days=1)
+                current_date += timedelta(days=1)
 
-        messages.success(
-            request,
-            f"{created} schedules created. {skipped} skipped due to conflicts."
-        )
+            messages.success(
+                request,
+                f"{created} schedules created. {skipped} skipped due to conflicts."
+            )
 
-        return redirect("staff_create_schedules")
+            return redirect("staff_create_schedules")
 
     return render(
         request,
@@ -304,7 +349,6 @@ def staff_create_schedules(request):
             "today": timezone.now().date(),
         },
     )
-
 
 @login_required
 @role_required(['staff'])
